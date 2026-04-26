@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理 · 私有网盘</title>
+    <style>
+        :root{
+            --bg-0:#07080a;
+            --bg-1:#0b0c0e;
+            --line:#1b1f27;
+            --line-2:#141821;
+            --txt:#c6ccd6;
+            --muted:#8e96a3;
+            --silver:#b9c0cb;
+            --ice:#a8c7ff;
+            --r:8px;
+            --r2:6px;
+            --fs:13px;
+            --side:278px;
+            --top:44px;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font:500 var(--fs)/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+            color:var(--txt);
+            background:
+                radial-gradient(1200px 700px at 12% 6%, rgba(168,199,255,.05), transparent 55%),
+                radial-gradient(900px 520px at 85% 85%, rgba(168,199,255,.04), transparent 50%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0, rgba(255,255,255,.02) 1px, transparent 1px, transparent 20px),
+                linear-gradient(180deg, var(--bg-0), var(--bg-1));
+        }
+        .shell{
+            min-height:100%;
+            display:grid;
+            grid-template-columns: var(--side) 1fr;
+        }
+        .side{
+            position:sticky;
+            top:0;
+            height:100vh;
+            padding:14px 14px 12px;
+            border-right:1px solid var(--line-2);
+            background:rgba(7,8,10,.68);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .id{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:10px;
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            background:rgba(0,0,0,.18);
+        }
+        .dot{
+            width:12px;height:12px;border-radius:4px;
+            background:linear-gradient(180deg, rgba(185,192,203,.95), rgba(185,192,203,.15));
+            border:1px solid rgba(255,255,255,.08);
+            flex:0 0 12px;
+        }
+        .who{min-width:0}
+        .who .u{
+            font-size:12px;
+            letter-spacing:.02em;
+            color:var(--silver);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .who .e{
+            margin-top:2px;
+            font-size:12px;
+            color:rgba(142,150,163,.75);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .sideSec{margin-top:12px}
+        .secT{
+            font-size:11px;
+            color:rgba(142,150,163,.7);
+            letter-spacing:.12em;
+            text-transform:uppercase;
+            padding:10px 10px 8px;
+        }
+        .nav{
+            display:grid;
+            gap:6px;
+            padding:0 6px;
+        }
+        .navLink{
+            appearance:none;
+            border:1px solid var(--line);
+            background:rgba(0,0,0,.14);
+            color:var(--silver);
+            text-align:left;
+            padding:10px 10px;
+            border-radius:var(--r2);
+            cursor:pointer;
+            user-select:none;
+            text-decoration:none;
+        }
+        .navLink:hover{
+            background:rgba(14,16,20,.55);
+            border-color:rgba(168,199,255,.20);
+        }
+        .main{
+            min-height:100vh;
+            display:grid;
+            grid-template-rows: var(--top) auto;
+        }
+        .topbar{
+            position:sticky;
+            top:0;
+            z-index:10;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            padding:0 12px 0 12px;
+            border-bottom:1px solid var(--line-2);
+            background:rgba(7,8,10,.68);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .mini{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            min-width:0;
+        }
+        .brand{
+            font-size:11px;
+            letter-spacing:.18em;
+            text-transform:uppercase;
+            color:rgba(185,192,203,.78);
+            white-space:nowrap;
+        }
+        .hint{
+            font-size:12px;
+            color:rgba(142,150,163,.75);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .ctl{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            min-width:0;
+        }
+        .btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px 10px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:rgba(10,12,16,.35);
+            color:var(--silver);
+            cursor:pointer;
+            user-select:none;
+            text-decoration:none;
+        }
+        .btn:hover{
+            background:rgba(14,16,20,.55);
+            border-color:rgba(168,199,255,.22);
+        }
+        .btn:disabled{
+            opacity:.45;
+            cursor:not-allowed;
+        }
+        .hamb{display:none}
+        .pad{padding:12px}
+        .notice{
+            margin:0 12px 0;
+            padding:10px 10px;
+            border:1px solid rgba(168,199,255,.18);
+            background:rgba(0,0,0,.14);
+            border-radius:var(--r2);
+            color:rgba(185,192,203,.88);
+        }
+        .table{
+            margin-top:12px;
+            border-top:1px solid var(--line-2);
+        }
+        .rowH, .row{
+            display:grid;
+            grid-template-columns: 80px 1fr 1.2fr 110px 110px;
+            gap:10px;
+            padding:10px 12px;
+            border-bottom:1px solid var(--line-2);
+            align-items:center;
+        }
+        .rowH{
+            position:sticky;
+            top:var(--top);
+            z-index:5;
+            background:rgba(7,8,10,.78);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            font-size:11px;
+            letter-spacing:.14em;
+            text-transform:uppercase;
+            color:rgba(142,150,163,.7);
+        }
+        .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+        .muted{color:rgba(142,150,163,.8)}
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:6px 8px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:rgba(0,0,0,.14);
+            color:rgba(185,192,203,.88);
+            font-size:12px;
+            width:fit-content;
+        }
+        .pill.on{border-color:rgba(168,199,255,.20)}
+        .act{display:flex;justify-content:flex-end}
+        .act form{margin:0}
+        @media (max-width: 940px){
+            .shell{grid-template-columns: 1fr}
+            .side{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--line-2)}
+            .rowH,.row{grid-template-columns: 70px 1fr 1fr 90px 100px}
+        }
+        @media (max-width: 640px){
+            .side{padding:12px 12px 10px}
+            .hamb{display:inline-flex}
+            .side.isCollapsed .sideSec{display:none}
+            .nav{gap:8px;padding:0}
+            .navLink{padding:11px 10px}
+
+            .topbar{flex-wrap:wrap;padding:10px;gap:10px}
+            .ctl{flex-wrap:wrap;width:100%}
+            .btn{min-height:40px}
+
+            .pad{padding:10px}
+            .table{display:grid;grid-template-columns:1fr;gap:10px;border-top:none;padding:10px}
+            .rowH{display:none}
+            .row{
+                grid-template-columns:1fr;
+                gap:8px;
+                border:1px solid var(--line);
+                border-radius:var(--r);
+                background:rgba(0,0,0,.12);
+            }
+            .row > div:nth-child(1),
+            .row > div:nth-child(2),
+            .row > div:nth-child(3),
+            .row > div:nth-child(4){
+                display:flex;
+                justify-content:space-between;
+                gap:12px;
+            }
+            .row > div:nth-child(1)::before{content:"ID";color:rgba(142,150,163,.75)}
+            .row > div:nth-child(2)::before{content:"用户名";color:rgba(142,150,163,.75)}
+            .row > div:nth-child(3)::before{content:"邮箱";color:rgba(142,150,163,.75)}
+            .row > div:nth-child(4)::before{content:"权限";color:rgba(142,150,163,.75)}
+            .act{justify-content:flex-start;flex-wrap:wrap;gap:8px}
+            .act .btn{flex:1;min-width:120px}
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <aside class="side">
+            <div class="id">
+                <div class="dot" aria-hidden="true"></div>
+                <div class="who">
+                    <div class="u">{{ user.username }}</div>
+                    <div class="e">{{ user.email }}</div>
+                </div>
+                <button class="btn hamb" type="button" aria-label="展开或收起侧边栏" aria-expanded="true">菜单</button>
+            </div>
+
+            <div class="sideSec">
+                <div class="secT">入口</div>
+                <div class="nav">
+                    <a class="navLink" href="{{ request.url_for('index') }}">网盘</a>
+                    <a class="navLink" href="{{ request.url_for('shared_files') }}">共享</a>
+                    <a class="navLink" href="{{ request.url_for('profile') }}">账户</a>
+                </div>
+            </div>
+        </aside>
+
+        <section class="main">
+            <div class="topbar" aria-label="迷你操作栏">
+                <div class="mini">
+                    <div class="brand">Admin</div>
+                    <div class="hint">用户管理</div>
+                </div>
+                <div class="ctl">
+                    <a class="btn" href="{{ request.url_for('index') }}">返回</a>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="pad">
+                <div class="notice" role="status">{{ messages[0] }}</div>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="table pad" role="table" aria-label="用户列表">
+                <div class="rowH" role="row">
+                    <div role="columnheader">ID</div>
+                    <div role="columnheader">用户名</div>
+                    <div role="columnheader">邮箱</div>
+                    <div role="columnheader">管理员</div>
+                    <div role="columnheader" style="text-align:right">操作</div>
+                </div>
+
+                {% for u in users %}
+                <div class="row" role="row">
+                    <div class="mono muted" role="cell">{{ u.id }}</div>
+                    <div role="cell">{{ u.username }}</div>
+                    <div class="muted" role="cell">{{ u.email }}</div>
+                    <div role="cell">
+                        <span class="pill {% if u.is_admin %}on{% endif %}">{{ '是' if u.is_admin else '否' }}</span>
+                    </div>
+                    <div class="act" role="cell">
+                        <form action="{{ request.url_for('delete_user_frontend', user_id=u.id) }}" method="post">
+                            <button class="btn" type="submit" {% if current_user and current_user.id == u.id %}disabled{% endif %}>删除</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+    <script>
+        (function () {
+            const side = document.querySelector('.side');
+            const btn = document.querySelector('.hamb');
+            if (!side || !btn) return;
+
+            const key = 'pd_side_collapsed';
+            const mq = window.matchMedia('(max-width: 640px)');
+
+            function apply(collapsed) {
+                side.classList.toggle('isCollapsed', collapsed);
+                btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            }
+
+            const saved = localStorage.getItem(key);
+            const initial = saved === null ? mq.matches : saved === '1';
+            apply(initial);
+
+            btn.addEventListener('click', function () {
+                const next = !side.classList.contains('isCollapsed');
+                apply(next);
+                localStorage.setItem(key, next ? '1' : '0');
+            });
+
+            mq.addEventListener('change', function (e) {
+                if (!e.matches) apply(false);
+                else {
+                    const s = localStorage.getItem(key);
+                    apply(s === null ? true : s === '1');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

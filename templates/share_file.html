@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分享 · 私有网盘</title>
+    <style>
+        :root{
+            --bg-0:#07080a;
+            --bg-1:#0b0c0e;
+            --line:#1b1f27;
+            --line-2:#141821;
+            --txt:#c6ccd6;
+            --muted:#8e96a3;
+            --silver:#b9c0cb;
+            --ice:#a8c7ff;
+            --r:8px;
+            --r2:6px;
+            --fs:14px;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font:500 var(--fs)/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+            color:var(--txt);
+            background:
+                radial-gradient(1200px 700px at 20% 10%, rgba(168,199,255,.06), transparent 55%),
+                radial-gradient(900px 520px at 85% 85%, rgba(168,199,255,.04), transparent 50%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 18px),
+                linear-gradient(180deg, var(--bg-0), var(--bg-1));
+        }
+        .stage{
+            min-height:100%;
+            display:grid;
+            place-items:center;
+            padding:24px;
+        }
+        .panel{
+            width:min(520px, 100%);
+            background:rgba(10,12,16,.55);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .top{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            padding:18px 18px 14px;
+            border-bottom:1px solid var(--line-2);
+        }
+        .title{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+        .mark{
+            width:14px;height:14px;border-radius:4px;
+            background:linear-gradient(180deg, rgba(185,192,203,.95), rgba(185,192,203,.15));
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .brand{
+            display:flex;
+            flex-direction:column;
+            gap:2px;
+            letter-spacing:.02em;
+        }
+        .brand .a{font-size:12px;color:var(--silver);text-transform:uppercase}
+        .brand .b{font-size:12px;color:var(--muted)}
+        .body{padding:16px 18px 18px}
+        .notice{
+            border:1px solid rgba(168,199,255,.18);
+            background:rgba(12,14,18,.55);
+            border-radius:var(--r2);
+            padding:10px 10px;
+            color:var(--silver);
+            margin-bottom:12px;
+        }
+        .tag{
+            border:1px solid var(--line);
+            background:rgba(0,0,0,.16);
+            border-radius:var(--r2);
+            padding:10px 10px;
+            margin-bottom:10px;
+            color:rgba(185,192,203,.88);
+            word-break:break-all;
+        }
+        .grid{display:grid;gap:10px}
+        .field{display:grid;gap:6px}
+        .k{font-size:12px;color:var(--muted);letter-spacing:.02em}
+        input{
+            width:100%;
+            padding:10px 10px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:rgba(0,0,0,.22);
+            color:var(--txt);
+            outline:none;
+        }
+        input::placeholder{color:rgba(142,150,163,.55)}
+        input:focus{border-color:rgba(168,199,255,.28)}
+        .btn{
+            display:inline-flex;
+            justify-content:center;
+            align-items:center;
+            gap:8px;
+            padding:10px 10px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:rgba(10,12,16,.35);
+            color:var(--silver);
+            text-decoration:none;
+            cursor:pointer;
+            user-select:none;
+            width:100%;
+        }
+        .btn:hover{
+            background:rgba(14,16,20,.55);
+            border-color:rgba(168,199,255,.22);
+        }
+        .btn.primary{border-color:rgba(168,199,255,.16)}
+        .btnRow{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap:10px;
+            margin-top:12px;
+        }
+        @media (max-width: 640px){
+            .stage{padding:14px;place-items:stretch}
+            .panel{width:100%}
+            .top{flex-wrap:wrap;padding:14px 14px 12px}
+            .top a.btn{width:100% !important}
+            .body{padding:14px}
+            input{font-size:16px}
+            .btn{min-height:44px}
+            .btnRow{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+    <main class="stage">
+        <section class="panel" aria-label="分享文件">
+            <div class="top">
+                <div class="title">
+                    <div class="mark" aria-hidden="true"></div>
+                    <div class="brand">
+                        <div class="a">Share</div>
+                        <div class="b">文件转交</div>
+                    </div>
+                </div>
+                <a class="btn" style="width:auto;padding:8px 10px" href="{{ request.url_for('index') }}">返回</a>
+            </div>
+
+            <div class="body">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="notice" role="status">{{ messages[0] }}</div>
+                {% endif %}
+                {% endwith %}
+
+                <div class="tag" aria-label="文件名">{{ filename }}</div>
+
+                <form class="grid" action="{{ request.url_for('share_file_post', filename=filename) }}" method="post" autocomplete="off">
+                    <label class="field" for="username">
+                        <span class="k">接收者用户名</span>
+                        <input id="username" name="username" type="text" placeholder="输入对方用户名" required />
+                    </label>
+
+                    <div class="btnRow">
+                        <button class="btn primary" type="submit">确认分享</button>
+                        <a class="btn" href="{{ request.url_for('index') }}">取消</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

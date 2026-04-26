@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 · 私有网盘</title>
+    <style>
+        :root{
+            --bg-0:#07080a;
+            --bg-1:#0b0c0e;
+            --bg-2:#101216;
+            --line:#1b1f27;
+            --line-2:#141821;
+            --txt:#c6ccd6;
+            --muted:#8e96a3;
+            --silver:#b9c0cb;
+            --ice:#a8c7ff;
+            --ice-2:rgba(168,199,255,.55);
+            --r:8px;
+            --r2:6px;
+            --fs:14px;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font:500 var(--fs)/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+            color:var(--txt);
+            background:
+                radial-gradient(1200px 700px at 20% 10%, rgba(168,199,255,.06), transparent 55%),
+                radial-gradient(900px 520px at 85% 85%, rgba(168,199,255,.04), transparent 50%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 18px),
+                linear-gradient(180deg, var(--bg-0), var(--bg-1));
+        }
+
+        .stage{
+            min-height:100%;
+            display:grid;
+            place-items:center;
+            padding:24px;
+        }
+
+        .panel{
+            width:min(420px, 100%);
+            background:rgba(10,12,16,.55);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .top{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:18px 18px 14px;
+            border-bottom:1px solid var(--line-2);
+        }
+
+        .mark{
+            width:14px;
+            height:14px;
+            border-radius:4px;
+            background:
+                linear-gradient(180deg, rgba(185,192,203,.95), rgba(185,192,203,.15));
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .brand{
+            display:flex;
+            flex-direction:column;
+            gap:2px;
+            letter-spacing:.02em;
+        }
+        .brand .a{font-size:12px;color:var(--silver);text-transform:uppercase}
+        .brand .b{font-size:12px;color:var(--muted)}
+
+        .body{padding:16px 18px 18px}
+
+        .notice{
+            border:1px solid rgba(168,199,255,.18);
+            background:rgba(12,14,18,.55);
+            border-radius:var(--r2);
+            padding:10px 10px;
+            color:var(--silver);
+            margin-bottom:12px;
+        }
+
+        .grid{
+            display:grid;
+            gap:10px;
+        }
+
+        .field{display:grid; gap:6px}
+        .k{font-size:12px; color:var(--muted); letter-spacing:.02em}
+
+        .row{
+            display:flex;
+            align-items:stretch;
+            gap:8px;
+        }
+
+        input{
+            width:100%;
+            padding:10px 10px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:rgba(0,0,0,.22);
+            color:var(--txt);
+            outline:none;
+        }
+        input::placeholder{color:rgba(142,150,163,.55)}
+        input:focus{
+            border-color:rgba(168,199,255,.28);
+            box-shadow:none;
+        }
+
+        .btn{
+            display:inline-flex;
+            justify-content:center;
+            align-items:center;
+            gap:8px;
+            padding:10px 10px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:rgba(10,12,16,.35);
+            color:var(--silver);
+            text-decoration:none;
+            cursor:pointer;
+            user-select:none;
+        }
+        .btn:hover{
+            background:rgba(14,16,20,.55);
+            border-color:rgba(168,199,255,.22);
+            box-shadow:none;
+        }
+        .btn:active{transform:none}
+
+        .btn.primary{
+            border-color:rgba(168,199,255,.16);
+        }
+
+        .ghost{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding-top:10px;
+            border-top:1px solid var(--line-2);
+            margin-top:12px;
+            gap:10px;
+        }
+
+        .tiny{
+            font-size:12px;
+            color:var(--muted);
+            text-decoration:none;
+            border-bottom:1px solid transparent;
+        }
+        .tiny:hover{
+            color:var(--silver);
+            border-bottom-color:rgba(168,199,255,.18);
+        }
+
+        .toggle{
+            width:44px;
+            flex:0 0 44px;
+            border-radius:var(--r2);
+        }
+        @media (max-width: 640px){
+            .stage{padding:14px;place-items:stretch}
+            .panel{width:100%}
+            .top{padding:14px 14px 12px}
+            .body{padding:14px}
+            input{font-size:16px}
+            .btn{min-height:44px}
+            .ghost{flex-direction:column;align-items:stretch}
+            .tiny{display:flex;justify-content:center;padding:10px 10px;border:1px solid var(--line);border-radius:var(--r2);background:rgba(0,0,0,.14)}
+        }
+    </style>
+</head>
+<body>
+    <main class="stage">
+        <section class="panel" aria-label="登录">
+            <div class="top">
+                <div class="mark" aria-hidden="true"></div>
+                <div class="brand">
+                    <div class="a">Private Drive</div>
+                    <div class="b">极简 · 低饱和 · 深色</div>
+                </div>
+            </div>
+
+            <div class="body">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="notice" role="status">{{ messages[0] }}</div>
+                {% endif %}
+                {% endwith %}
+
+                <form id="loginForm" class="grid" action="{{ request.url_for('login_post') }}" method="post" autocomplete="on">
+                    <label class="field" for="username">
+                        <span class="k">用户名</span>
+                        <input id="username" name="username" type="text" autocomplete="username" placeholder="输入用户名" required />
+                    </label>
+
+                    <div class="field">
+                        <span class="k">密码</span>
+                        <div class="row">
+                            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="输入密码" required />
+                            <button id="togglePassword" class="btn toggle" type="button" aria-label="显示或隐藏密码">⟡</button>
+                        </div>
+                    </div>
+
+                    <button class="btn primary" type="submit">进入</button>
+
+                    <div class="ghost">
+                        <a class="tiny" href="{{ request.url_for('register') }}">创建账号</a>
+                        <a class="tiny" href="{{ request.url_for('index') }}">返回</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 交互约束：只做“微弱改变”，不做缩放/花哨动效
+        (function () {
+            const toggleBtn = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            if (!toggleBtn || !passwordInput) return;
+
+            toggleBtn.addEventListener('click', function () {
+                passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+            });
+        })();
+    </script>
+</body>
+</html>

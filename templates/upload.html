@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传 · 私有网盘</title>
+    <style>
+        :root{
+            --bg-0:#07080a;
+            --bg-1:#0b0c0e;
+            --line:#1b1f27;
+            --line-2:#141821;
+            --txt:#c6ccd6;
+            --muted:#8e96a3;
+            --silver:#b9c0cb;
+            --ice:#a8c7ff;
+            --r:8px;
+            --r2:6px;
+            --fs:14px;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font:500 var(--fs)/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+            color:var(--txt);
+            background:
+                radial-gradient(1200px 700px at 20% 10%, rgba(168,199,255,.06), transparent 55%),
+                radial-gradient(900px 520px at 85% 85%, rgba(168,199,255,.04), transparent 50%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 18px),
+                linear-gradient(180deg, var(--bg-0), var(--bg-1));
+        }
+        .stage{
+            min-height:100%;
+            display:grid;
+            place-items:center;
+            padding:24px;
+        }
+        .panel{
+            width:min(520px, 100%);
+            background:rgba(10,12,16,.55);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .top{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            padding:18px 18px 14px;
+            border-bottom:1px solid var(--line-2);
+        }
+        .title{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+        .mark{
+            width:14px;height:14px;border-radius:4px;
+            background:linear-gradient(180deg, rgba(185,192,203,.95), rgba(185,192,203,.15));
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .brand{
+            display:flex;
+            flex-direction:column;
+            gap:2px;
+            letter-spacing:.02em;
+        }
+        .brand .a{font-size:12px;color:var(--silver);text-transform:uppercase}
+        .brand .b{font-size:12px;color:var(--muted)}
+        .body{padding:16px 18px 18px}
+        .notice{
+            border:1px solid rgba(168,199,255,.18);
+            background:rgba(12,14,18,.55);
+            border-radius:var(--r2);
+            padding:10px 10px;
+            color:var(--silver);
+            margin-bottom:12px;
+        }
+        .drop{
+            border:1px solid var(--line);
+            background:rgba(0,0,0,.16);
+            border-radius:var(--r2);
+            padding:14px 12px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            cursor:pointer;
+            user-select:none;
+        }
+        .drop:hover{
+            background:rgba(14,16,20,.55);
+            border-color:rgba(168,199,255,.20);
+        }
+        .drop .t{
+            min-width:0;
+            display:flex;
+            flex-direction:column;
+            gap:2px;
+        }
+        .drop .a{font-size:12px;color:rgba(185,192,203,.88)}
+        .drop .b{
+            font-size:12px;
+            color:rgba(142,150,163,.75);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .btn{
+            display:inline-flex;
+            justify-content:center;
+            align-items:center;
+            gap:8px;
+            padding:10px 10px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:rgba(10,12,16,.35);
+            color:var(--silver);
+            text-decoration:none;
+            cursor:pointer;
+            user-select:none;
+            width:100%;
+        }
+        .btn:hover{
+            background:rgba(14,16,20,.55);
+            border-color:rgba(168,199,255,.22);
+        }
+        .btn.primary{border-color:rgba(168,199,255,.16)}
+        .fileInput{
+            position:absolute;
+            width:1px;
+            height:1px;
+            opacity:0;
+            pointer-events:none;
+        }
+        .btnRow{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap:10px;
+            margin-top:12px;
+        }
+        @media (max-width: 640px){
+            .stage{padding:14px;place-items:stretch}
+            .panel{width:100%}
+            .top{flex-wrap:wrap;padding:14px 14px 12px}
+            .top a.btn{width:100% !important}
+            .body{padding:14px}
+            .btn{min-height:44px}
+            .btnRow{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+    <main class="stage">
+        <section class="panel" aria-label="上传文件">
+            <div class="top">
+                <div class="title">
+                    <div class="mark" aria-hidden="true"></div>
+                    <div class="brand">
+                        <div class="a">Upload</div>
+                        <div class="b">选择一个文件</div>
+                    </div>
+                </div>
+                <a class="btn" style="width:auto;padding:8px 10px" href="{{ request.url_for('index') }}">返回</a>
+            </div>
+
+            <div class="body">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="notice" role="status">{{ messages[0] }}</div>
+                {% endif %}
+                {% endwith %}
+
+                <form id="uploadForm" action="{{ request.url_for('upload_file_frontend') }}" method="post" enctype="multipart/form-data">
+                    <input id="fileInput" class="fileInput" name="file" type="file" required />
+                    <div id="drop" class="drop" role="button" tabindex="0" aria-label="选择文件">
+                        <div class="t">
+                            <div class="a">点击选择</div>
+                            <div id="fname" class="b">未选择文件</div>
+                        </div>
+                        <div class="a">⟡</div>
+                    </div>
+                    <div class="btnRow">
+                        <button class="btn primary" type="submit">上传</button>
+                        <a class="btn" href="{{ request.url_for('index') }}">取消</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const drop = document.getElementById('drop');
+            const fileInput = document.getElementById('fileInput');
+            const fname = document.getElementById('fname');
+            if (!drop || !fileInput || !fname) return;
+
+            function syncName() {
+                const f = fileInput.files && fileInput.files[0] ? fileInput.files[0].name : '未选择文件';
+                fname.textContent = f;
+            }
+            drop.addEventListener('click', () => fileInput.click());
+            drop.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInput.click();
+                }
+            });
+            fileInput.addEventListener('change', syncName);
+            syncName();
+        })();
+    </script>
+</body>
+</html>

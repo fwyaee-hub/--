@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账户 · 私有网盘</title>
+    <style>
+        :root{
+            --bg-0:#07080a;
+            --bg-1:#0b0c0e;
+            --line:#1b1f27;
+            --line-2:#141821;
+            --txt:#c6ccd6;
+            --muted:#8e96a3;
+            --silver:#b9c0cb;
+            --ice:#a8c7ff;
+            --r:8px;
+            --r2:6px;
+            --fs:14px;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font:500 var(--fs)/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+            color:var(--txt);
+            background:
+                radial-gradient(1200px 700px at 20% 10%, rgba(168,199,255,.06), transparent 55%),
+                radial-gradient(900px 520px at 85% 85%, rgba(168,199,255,.04), transparent 50%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 18px),
+                linear-gradient(180deg, var(--bg-0), var(--bg-1));
+        }
+        .stage{
+            min-height:100%;
+            display:grid;
+            place-items:center;
+            padding:24px;
+        }
+        .panel{
+            width:min(520px, 100%);
+            background:rgba(10,12,16,.55);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .top{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            padding:18px 18px 14px;
+            border-bottom:1px solid var(--line-2);
+        }
+        .title{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+        .mark{
+            width:14px;height:14px;border-radius:4px;
+            background:linear-gradient(180deg, rgba(185,192,203,.95), rgba(185,192,203,.15));
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .brand{
+            display:flex;
+            flex-direction:column;
+            gap:2px;
+            letter-spacing:.02em;
+        }
+        .brand .a{font-size:12px;color:var(--silver);text-transform:uppercase}
+        .brand .b{font-size:12px;color:var(--muted)}
+        .body{padding:16px 18px 18px}
+        .notice{
+            border:1px solid rgba(168,199,255,.18);
+            background:rgba(12,14,18,.55);
+            border-radius:var(--r2);
+            padding:10px 10px;
+            color:var(--silver);
+            margin-bottom:12px;
+        }
+        .kv{
+            border:1px solid var(--line);
+            background:rgba(0,0,0,.16);
+            border-radius:var(--r2);
+            padding:12px 12px;
+            display:grid;
+            gap:10px;
+        }
+        .kvRow{
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            border-bottom:1px solid var(--line-2);
+            padding-bottom:10px;
+        }
+        .kvRow:last-child{border-bottom:none;padding-bottom:0}
+        .k{font-size:12px;color:rgba(142,150,163,.75);letter-spacing:.02em}
+        .v{
+            font-size:13px;
+            color:rgba(198,204,214,.95);
+            max-width:70%;
+            text-align:right;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+        }
+        .btn{
+            display:inline-flex;
+            justify-content:center;
+            align-items:center;
+            gap:8px;
+            padding:10px 10px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:rgba(10,12,16,.35);
+            color:var(--silver);
+            text-decoration:none;
+            cursor:pointer;
+            user-select:none;
+            width:100%;
+        }
+        .btn:hover{
+            background:rgba(14,16,20,.55);
+            border-color:rgba(168,199,255,.22);
+        }
+        .btn.primary{border-color:rgba(168,199,255,.16)}
+        .btnRow{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap:10px;
+            margin-top:12px;
+        }
+        @media (max-width: 640px){
+            .stage{padding:14px;place-items:stretch}
+            .panel{width:100%}
+            .top{flex-wrap:wrap;padding:14px 14px 12px}
+            .top a.btn{width:100% !important}
+            .body{padding:14px}
+            .v{max-width:60%}
+            .btn{min-height:44px}
+            .btnRow{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+    <main class="stage">
+        <section class="panel" aria-label="账户信息">
+            <div class="top">
+                <div class="title">
+                    <div class="mark" aria-hidden="true"></div>
+                    <div class="brand">
+                        <div class="a">Account</div>
+                        <div class="b">个人信息</div>
+                    </div>
+                </div>
+                <a class="btn" style="width:auto;padding:8px 10px" href="{{ request.url_for('index') }}">返回</a>
+            </div>
+
+            <div class="body">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="notice" role="status">{{ messages[0] }}</div>
+                {% endif %}
+                {% endwith %}
+
+                <div class="kv" role="list">
+                    <div class="kvRow" role="listitem">
+                        <div class="k">用户名</div>
+                        <div class="v">{{ username }}</div>
+                    </div>
+                    <div class="kvRow" role="listitem">
+                        <div class="k">邮箱</div>
+                        <div class="v">{{ email }}</div>
+                    </div>
+                </div>
+
+                <div class="btnRow">
+                    <a class="btn primary" href="{{ request.url_for('change_password_page') }}">修改密码</a>
+                    <a class="btn" href="{{ request.url_for('logout') }}">退出</a>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

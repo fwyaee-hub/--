@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的文件 · 私有网盘</title>
+    <style>
+        :root{
+            --bg-0:#07080a;
+            --bg-1:#0b0c0e;
+            --bg-2:#101216;
+            --bg-3:#141821;
+            --line:#1b1f27;
+            --line-2:#141821;
+            --txt:#c6ccd6;
+            --muted:#8e96a3;
+            --silver:#b9c0cb;
+            --ice:#a8c7ff;
+            --r:6px;
+            --r2:4px;
+            --cyan:#7dd3fc;
+            --violet:#a78bfa;
+            --rose:#fb7185;
+            --amber:#fbbf24;
+            --lime:#a3e635;
+            --teal:#2dd4bf;
+            --fs:13px;
+            --side:278px;
+            --top:44px;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font:500 var(--fs)/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+            color:var(--txt);
+            background:
+                radial-gradient(1200px 700px at 12% 6%, rgba(168,199,255,.05), transparent 55%),
+                radial-gradient(900px 520px at 85% 85%, rgba(168,199,255,.04), transparent 50%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0, rgba(255,255,255,.02) 1px, transparent 1px, transparent 20px),
+                linear-gradient(180deg, var(--bg-0), var(--bg-1));
+        }
+        .shell{
+            min-height:100%;
+            display:grid;
+            grid-template-columns: var(--side) 1fr;
+        }
+        .side{
+            position:sticky;
+            top:0;
+            height:100vh;
+            padding:14px 14px 12px;
+            border-right:1px solid var(--line-2);
+            background:rgba(7,8,10,.68);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .id{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:10px;
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            background:rgba(0,0,0,.18);
+        }
+        .dot{
+            width:12px;height:12px;border-radius:4px;
+            background:linear-gradient(180deg, rgba(185,192,203,.95), rgba(185,192,203,.15));
+            border:1px solid rgba(255,255,255,.08);
+            flex:0 0 12px;
+        }
+        .who{min-width:0}
+        .who .u{
+            font-size:12px;
+            letter-spacing:.02em;
+            color:var(--silver);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .who .e{
+            margin-top:2px;
+            font-size:12px;
+            color:rgba(142,150,163,.75);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .sideSec{margin-top:12px}
+        .secT{
+            font-size:11px;
+            color:rgba(142,150,163,.7);
+            letter-spacing:.12em;
+            text-transform:uppercase;
+            padding:10px 10px 8px;
+        }
+        .nav{
+            display:grid;
+            gap:6px;
+            padding:0 6px;
+        }
+        .navLink{
+            appearance:none;
+            border:1px solid var(--line);
+            background:rgba(0,0,0,.14);
+            color:var(--silver);
+            text-align:left;
+            padding:10px 10px;
+            border-radius:var(--r2);
+            cursor:pointer;
+            user-select:none;
+            text-decoration:none;
+        }
+        .navLink:hover{
+            background:rgba(14,16,20,.55);
+            border-color:rgba(168,199,255,.20);
+        }
+        .navLink.isOn{
+            border-color:rgba(168,199,255,.26);
+            background:linear-gradient(180deg, rgba(10,12,16,.48), rgba(8,10,14,.22));
+        }
+        .meter{
+            padding:10px;
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            background:rgba(0,0,0,.14);
+            margin:0 6px;
+        }
+        .line{
+            height:2px;
+            background:rgba(255,255,255,.06);
+            position:relative;
+            overflow:hidden;
+        }
+        .line > i{
+            position:absolute;
+            inset:0;
+            width:0%;
+            background:linear-gradient(90deg, rgba(185,192,203,.55), rgba(168,199,255,.35));
+        }
+        .mMeta{
+            display:flex;
+            justify-content:space-between;
+            margin-top:10px;
+            font-size:12px;
+            color:rgba(142,150,163,.85);
+        }
+        .main{
+            min-height:100vh;
+            display:grid;
+            grid-template-rows: var(--top) auto;
+        }
+        .topbar{
+            position:sticky;
+            top:0;
+            z-index:10;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            padding:0 12px 0 12px;
+            border-bottom:1px solid var(--line-2);
+            background:rgba(7,8,10,.68);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .mini{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            min-width:0;
+        }
+        .brand{
+            font-size:11px;
+            letter-spacing:.18em;
+            text-transform:uppercase;
+            color:rgba(185,192,203,.78);
+            white-space:nowrap;
+        }
+        .hint{
+            font-size:12px;
+            color:rgba(142,150,163,.75);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .crumb{
+            color:rgba(142,150,163,.78);
+            text-decoration:none;
+            border-bottom:1px solid transparent;
+        }
+        .crumb:hover{border-bottom-color:rgba(168,199,255,.18)}
+        .sep{opacity:.5;margin:0 6px}
+        .tag{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:4px 8px;
+            border:1px solid var(--line);
+            border-radius:4px;
+            background:rgba(0,0,0,.16);
+            color:rgba(185,192,203,.86);
+            font-size:11px;
+            letter-spacing:.10em;
+            text-transform:uppercase;
+            width:max-content;
+        }
+        .tag::before{
+            content:"";
+            width:6px;
+            height:6px;
+            border-radius:2px;
+            background:var(--accent, rgba(168,199,255,.24));
+            box-shadow:0 0 0 1px rgba(255,255,255,.05);
+        }
+        .ctl{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            min-width:0;
+        }
+        .q{
+            width:220px;
+            max-width:36vw;
+            padding:8px 10px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:rgba(0,0,0,.22);
+            color:var(--txt);
+            outline:none;
+        }
+        .q::placeholder{color:rgba(142,150,163,.55)}
+        .q:focus{border-color:rgba(168,199,255,.24)}
+        .btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px 10px;
+            border-radius:var(--r2);
+            border:1px solid var(--line);
+            background:linear-gradient(180deg, rgba(10,12,16,.45), rgba(8,10,14,.20));
+            color:var(--silver);
+            cursor:pointer;
+            user-select:none;
+            text-decoration:none;
+        }
+        .btn:hover{
+            background:linear-gradient(180deg, rgba(14,16,20,.62), rgba(8,10,14,.24));
+            border-color:rgba(168,199,255,.26);
+        }
+        .btn:focus-visible{
+            outline:2px solid rgba(168,199,255,.16);
+            outline-offset:1px;
+        }
+        .hamb{display:none}
+        .pad{padding:10px}
+        .notice{
+            margin:0 12px 0;
+            padding:10px 10px;
+            border:1px solid rgba(168,199,255,.18);
+            background:rgba(0,0,0,.14);
+            border-radius:var(--r2);
+            color:rgba(185,192,203,.88);
+        }
+        .table{
+            margin-top:12px;
+            border-top:1px solid var(--line-2);
+        }
+        .rowH, .row{
+            display:grid;
+            grid-template-columns: 1.2fr .35fr .45fr .55fr 200px;
+            gap:10px;
+            padding:10px 12px;
+            border-bottom:1px solid var(--line-2);
+            align-items:center;
+        }
+        .row{position:relative}
+        .fileRow{--accent: rgba(168,199,255,.24)}
+        .fileRow[data-kind="folder"]{--accent: rgba(45,212,191,.30)}
+        .fileRow[data-ext="pdf"]{--accent: rgba(251,191,36,.26)}
+        .fileRow[data-ext="txt"], .fileRow[data-ext="log"], .fileRow[data-ext="md"], .fileRow[data-ext="json"], .fileRow[data-ext="csv"]{--accent: rgba(163,230,53,.22)}
+        .fileRow[data-ext="png"], .fileRow[data-ext="jpg"], .fileRow[data-ext="jpeg"], .fileRow[data-ext="gif"], .fileRow[data-ext="webp"], .fileRow[data-ext="bmp"], .fileRow[data-ext="svg"]{--accent: rgba(125,211,252,.24)}
+        .fileRow[data-ext="zip"], .fileRow[data-ext="rar"], .fileRow[data-ext="7z"], .fileRow[data-ext="tar"], .fileRow[data-ext="gz"]{--accent: rgba(167,139,250,.22)}
+        .fileRow::before{
+            content:"";
+            position:absolute;
+            left:0;
+            top:0;
+            bottom:0;
+            width:2px;
+            background:linear-gradient(180deg, transparent, var(--accent), transparent);
+            opacity:.95;
+        }
+        .row:hover{
+            background:linear-gradient(90deg, rgba(0,0,0,.10), rgba(0,0,0,.02));
+        }
+        .rowH{
+            position:sticky;
+            top:var(--top);
+            z-index:5;
+            background:rgba(7,8,10,.78);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            font-size:11px;
+            letter-spacing:.14em;
+            text-transform:uppercase;
+            color:rgba(142,150,163,.7);
+        }
+        .name{
+            min-width:0;
+            display:flex;
+            flex-direction:column;
+            gap:2px;
+        }
+        .n1{
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            color:rgba(198,204,214,.95);
+            text-decoration:none;
+            border-bottom:1px solid transparent;
+        }
+        .n1:hover{border-bottom-color:rgba(168,199,255,.18)}
+        .n2{font-size:12px;color:rgba(142,150,163,.75)}
+        .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+        .muted{color:rgba(142,150,163,.8)}
+        .act{
+            display:flex;
+            justify-content:flex-end;
+            gap:6px;
+        }
+        .act form{margin:0}
+        .fileInput{
+            position:absolute;
+            width:1px;
+            height:1px;
+            opacity:0;
+            pointer-events:none;
+        }
+        .upBox{
+            display:none;
+            padding:10px 14px;
+            border-bottom:1px solid var(--line-2);
+            background:rgba(0,0,0,.12);
+        }
+        .upBox.isOn{display:flex;align-items:center;gap:12px}
+        .upBar{
+            flex:1;
+            height:8px;
+            background:rgba(255,255,255,.05);
+            border:1px solid var(--line);
+            border-radius:var(--r2);
+            overflow:hidden;
+        }
+        .upBar i{display:block;height:100%;width:0;background:linear-gradient(90deg, rgba(168,199,255,.18), rgba(214,222,235,.22))}
+        .drop{
+            position:fixed;
+            inset:0;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            background:rgba(0,0,0,.55);
+            backdrop-filter: blur(6px);
+            z-index:999;
+        }
+        .drop.isOn{display:flex}
+        .dropCard{
+            width:min(560px, 92vw);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            background:rgba(0,0,0,.45);
+            padding:18px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.45);
+        }
+        .dropTitle{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+        .dropName{margin-top:6px;font-size:18px;color:var(--txt)}
+        @media (max-width: 940px){
+            .shell{grid-template-columns: 1fr}
+            .side{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--line-2)}
+        }
+        @media (max-width: 640px){
+            .side{padding:12px 12px 10px}
+            .hamb{display:inline-flex}
+            .side.isCollapsed .sideSec{display:none}
+            .nav{gap:8px;padding:0}
+            .navLink{padding:11px 10px}
+
+            .topbar{flex-wrap:wrap;padding:10px;gap:10px}
+            .ctl{flex-wrap:wrap;width:100%}
+            .q{width:100%;max-width:none}
+            #suffix, #dateFrom{max-width:none !important;width:100%}
+            .btn{min-height:40px}
+
+            .table{display:grid;grid-template-columns:1fr;gap:10px;border-top:none;padding:10px}
+            .rowH{display:none}
+            .row{
+                grid-template-columns:1fr;
+                gap:8px;
+                border:1px solid var(--line);
+                border-radius:var(--r);
+                background:rgba(0,0,0,.12);
+            }
+            .row > div:nth-child(2),
+            .row > div:nth-child(3),
+            .row > div:nth-child(4){
+                display:flex;
+                justify-content:space-between;
+                gap:12px;
+            }
+            .row > div:nth-child(2)::before{content:"类型";color:rgba(142,150,163,.75)}
+            .row > div:nth-child(3)::before{content:"大小";color:rgba(142,150,163,.75)}
+            .row > div:nth-child(4)::before{content:"时间";color:rgba(142,150,163,.75)}
+            .act{justify-content:flex-start;flex-wrap:wrap;gap:8px}
+            .act .btn{flex:1;min-width:96px}
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <aside class="side">
+            <div class="id">
+                <div class="dot" aria-hidden="true"></div>
+                <div class="who">
+                    <div class="u">{{ user.username }}</div>
+                    <div class="e">{{ user.email }}</div>
+                </div>
+                <button class="btn hamb" type="button" aria-label="展开或收起侧边栏" aria-expanded="true">菜单</button>
+            </div>
+
+            <div class="sideSec">
+                <div class="secT">空间</div>
+                <div class="meter" aria-label="存储空间">
+                    <div class="line" aria-hidden="true"><i id="usageBar" data-usage="{{ usage_pct }}"></i></div>
+                    <div class="mMeta">
+                        <span>{{ used_human }}</span>
+                        <span>{{ quota_human }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sideSec">
+                <div class="secT">目录</div>
+                <div class="nav">
+                    <a class="navLink{% if current_folder_id is none %} isOn{% endif %}" href="{{ request.url_for('uploaded_files') }}">根目录</a>
+                    {% for d in folders %}
+                    <a class="navLink{% if current_folder_id == d.id %} isOn{% endif %}" href="{{ request.url_for('uploaded_files') }}?folder={{ d.id }}">{{ ('—' * d.depth) ~ ' ' ~ d.name }}</a>
+                    {% endfor %}
+                </div>
+                <form action="{{ request.url_for('folder_create') }}" method="post" style="margin-top:10px;display:flex;gap:8px">
+                    <input class="q" name="name" type="text" placeholder="创建目录" style="height:36px;padding:0 10px" />
+                    <input type="hidden" name="parent_id" value="{{ current_folder_id if current_folder_id is not none else '' }}" />
+                    <button class="btn" type="submit">创建</button>
+                </form>
+
+                {% if current_folder_id is not none %}
+                <form action="{{ request.url_for('folder_rename', folder_id=current_folder_id) }}" method="post" style="margin-top:8px;display:flex;gap:8px">
+                    <input class="q" name="name" type="text" placeholder="重命名当前目录" style="height:36px;padding:0 10px" />
+                    <button class="btn" type="submit">重命名</button>
+                </form>
+
+                <form action="{{ request.url_for('folder_move', folder_id=current_folder_id) }}" method="post" style="margin-top:8px;display:flex;gap:8px">
+                    <select class="btn" name="parent_id" style="flex:1;text-align:left">
+                        <option value="">移动到：根目录</option>
+                        {% for d in folders %}
+                        {% if d.id != current_folder_id %}
+                        <option value="{{ d.id }}">移动到：{{ ('—' * d.depth) ~ ' ' ~ d.name }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    <button class="btn" type="submit">移动</button>
+                </form>
+
+                <form action="{{ request.url_for('folder_delete', folder_id=current_folder_id) }}" method="post" style="margin-top:8px">
+                    <button class="btn" type="submit" style="width:100%">删除当前目录</button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="sideSec">
+                <div class="secT">入口</div>
+                <div class="nav">
+                    <a class="navLink" href="{{ request.url_for('index') }}">网盘</a>
+                    <a class="navLink" href="{{ request.url_for('shared_files') }}">共享</a>
+                    <a class="navLink" href="{{ request.url_for('trash_page') }}">回收站</a>
+                    <a class="navLink" href="{{ request.url_for('profile') }}">账户</a>
+                    {% if user.is_admin %}
+                    <a class="navLink" href="{{ request.url_for('admin_dashboard') }}">管理</a>
+                    {% endif %}
+                </div>
+            </div>
+        </aside>
+
+        <section class="main">
+            <div class="topbar" aria-label="迷你操作栏">
+                <div class="mini">
+                    <div class="brand">{% if mode == 'trash' %}Trash{% else %}Files{% endif %}</div>
+                    <div class="hint">
+                        {% if mode == 'trash' %}
+                        可还原 · 可彻底删除
+                        {% else %}
+                        <a class="crumb" href="{{ request.url_for('uploaded_files') }}">根</a>
+                        {% for b in breadcrumb %}
+                        <span class="sep">/</span>
+                        <a class="crumb" href="{{ request.url_for('uploaded_files') }}?folder={{ b.id }}">{{ b.name }}</a>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="ctl">
+                    <input id="q" class="q" type="text" placeholder="搜索文件" aria-label="搜索文件" />
+                    <input id="suffix" class="q" type="text" placeholder="后缀筛选：pdf / jpg" aria-label="后缀筛选" style="max-width:160px" />
+                    <select id="sort" class="btn" aria-label="排序">
+                        <option value="time_desc">{% if mode == 'trash' %}删除时间↓{% else %}时间↓{% endif %}</option>
+                        <option value="time_asc">{% if mode == 'trash' %}删除时间↑{% else %}时间↑{% endif %}</option>
+                        <option value="size_desc">大小↓</option>
+                        <option value="size_asc">大小↑</option>
+                        <option value="name_asc">名称↑</option>
+                        <option value="name_desc">名称↓</option>
+                        <option value="type_asc">类型↑</option>
+                    </select>
+                    <input id="dateFrom" class="q" type="date" aria-label="起始日期" style="max-width:160px" />
+
+                    {% if mode != 'trash' %}
+                    <form id="uploadForm" action="{{ request.url_for('upload_file_frontend') }}" method="post" enctype="multipart/form-data">
+                        <input id="fileInput" class="fileInput" name="file" type="file" />
+                        <input id="folderId" type="hidden" name="folder_id" value="{{ current_folder_id if current_folder_id is not none else '' }}" />
+                        <button id="uploadBtn" class="btn" type="button">上传</button>
+                    </form>
+
+                    <a class="btn" href="{{ request.url_for('batch_verify') }}">批量验证</a>
+                    <a class="btn" href="{{ request.url_for('trash_page') }}">回收站</a>
+                    <a class="btn" href="{{ request.url_for('index') }}{% if current_folder_id is not none %}?folder={{ current_folder_id }}{% endif %}">返回</a>
+                    {% else %}
+                    <a class="btn" href="{{ request.url_for('uploaded_files') }}">返回文件</a>
+                    <a class="btn" href="{{ request.url_for('index') }}">返回网盘</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="pad">
+                <div class="notice" role="status">{{ messages[0] }}</div>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div id="upBox" class="upBox pad" aria-live="polite">
+                <div class="mono muted" id="upText">上传中…</div>
+                <div class="upBar"><i id="upProg"></i></div>
+                <button class="btn" id="upCancel" type="button">取消</button>
+            </div>
+
+            <div id="table" class="table pad">
+                <div class="rowH" aria-hidden="true">
+                    {% if mode == 'trash' %}
+                    <div>名称</div>
+                    <div>类型</div>
+                    <div>大小</div>
+                    <div>删除时间</div>
+                    <div style="text-align:right">操作</div>
+                    {% else %}
+                    <div>名称</div>
+                    <div>类型</div>
+                    <div>大小</div>
+                    <div>时间</div>
+                    <div style="text-align:right">操作</div>
+                    {% endif %}
+                </div>
+
+                {% if mode != 'trash' %}
+                {% for d in child_folders %}
+                <div class="row fileRow folderRow" data-kind="folder" data-name="{{ d.name|lower }}" data-ext="" data-size="0" data-time="{{ d.created_ts }}">
+                    <div class="name">
+                        <a class="n1" href="{{ request.url_for('uploaded_files') }}?folder={{ d.id }}" title="打开">{{ d.name }}</a>
+                        <div class="n2 mono muted">目录</div>
+                    </div>
+                    <div><span class="tag">dir</span></div>
+                    <div class="mono muted">—</div>
+                    <div class="muted">{{ d.created_at|datetimeformat }}</div>
+                    <div class="act">
+                        <a class="btn" href="{{ request.url_for('uploaded_files') }}?folder={{ d.id }}">打开</a>
+                        <form action="{{ request.url_for('folder_delete', folder_id=d.id) }}" method="post">
+                            <button class="btn" type="submit">删除</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                {% for f in files %}
+                {% if mode == 'trash' %}
+                <div class="row fileRow" data-name="{{ f.original_filename|lower }}" data-ext="{{ f.ext }}" data-size="{{ f.size_bytes }}" data-time="{{ f.trashed_ts }}">
+                    <div class="name">
+                        <div class="n1">{{ f.original_filename }}</div>
+                        <div class="n2 mono muted">已删除 · 可还原</div>
+                    </div>
+                    <div>{% if f.ext %}<span class="tag">{{ f.ext }}</span>{% else %}<span class="mono muted">—</span>{% endif %}</div>
+                    <div class="mono muted">{{ f.size_human }}</div>
+                    <div class="muted">{{ f.trashed_at|datetimeformat }}</div>
+                    <div class="act">
+                        <form action="{{ request.url_for('trash_restore', trash_id=f.trash_id) }}" method="post">
+                            <button class="btn" type="submit">还原</button>
+                        </form>
+                        <form action="{{ request.url_for('trash_purge', trash_id=f.trash_id) }}" method="post">
+                            <button class="btn" type="submit">彻底删除</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="row fileRow" data-name="{{ f.filename|lower }}" data-ext="{{ f.ext }}" data-size="{{ f.size_bytes }}" data-time="{{ f.upload_ts }}">
+                    <div class="name">
+                        <a class="n1" href="{{ request.url_for('download_file', filename=f.filename) }}" title="下载">{{ f.filename }}</a>
+                        <div class="n2 mono muted">{{ f.hash[:16] }}…</div>
+                    </div>
+                    <div>{% if f.ext %}<span class="tag">{{ f.ext }}</span>{% else %}<span class="mono muted">—</span>{% endif %}</div>
+                    <div class="mono muted">{{ f.size_human }}</div>
+                    <div class="muted">{{ f.upload_time|datetimeformat }}</div>
+                    <div class="act">
+                        <a class="btn" target="_blank" href="{{ request.url_for('preview_file', filename=f.filename) }}">预览</a>
+                        <button class="btn mvBtn" type="button" data-fn="{{ f.filename }}">移动</button>
+                        <a class="btn" href="{{ request.url_for('share_file', filename=f.filename) }}">分享</a>
+                        <a class="btn" href="{{ request.url_for('download_file', filename=f.filename) }}">下载</a>
+                        <form action="{{ request.url_for('delete_file', filename=f.filename) }}" method="post">
+                            <button class="btn" type="submit">回收站</button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                {% if not files %}
+                <div class="pad muted">暂无文件。</div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <div id="drop" class="drop" aria-hidden="true">
+        <div class="dropCard">
+            <div class="dropTitle">拖拽上传</div>
+            <div class="dropName">松开即可上传{% if mode != 'trash' %}到：{{ current_folder_name }}{% endif %}</div>
+        </div>
+    </div>
+
+    <div id="mv" class="drop" aria-hidden="true">
+        <div class="dropCard">
+            <div class="dropTitle">移动到目录</div>
+            <div class="dropName" id="mvName">—</div>
+            <form id="mvForm" method="post" action="#" style="margin-top:14px;display:flex;gap:10px;align-items:center">
+                <select id="mvSel" name="folder_id" class="btn" style="flex:1;text-align:left">
+                    <option value="">根目录</option>
+                    {% for d in folders %}
+                    <option value="{{ d.id }}">{{ ('—' * d.depth) ~ ' ' ~ d.name }}</option>
+                    {% endfor %}
+                </select>
+                <button class="btn" type="submit">确定</button>
+                <button class="btn" id="mvClose" type="button">取消</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const q = document.getElementById('q');
+            const suffix = document.getElementById('suffix');
+            const sortSel = document.getElementById('sort');
+            const dateFrom = document.getElementById('dateFrom');
+            const table = document.getElementById('table');
+            const rowH = table ? table.querySelector('.rowH') : null;
+            const uploadBtn = document.getElementById('uploadBtn');
+            const fileInput = document.getElementById('fileInput');
+            const uploadForm = document.getElementById('uploadForm');
+            const folderId = document.getElementById('folderId');
+            const upBox = document.getElementById('upBox');
+            const upProg = document.getElementById('upProg');
+            const upText = document.getElementById('upText');
+            const upCancel = document.getElementById('upCancel');
+            const drop = document.getElementById('drop');
+            const mv = document.getElementById('mv');
+            const mvForm = document.getElementById('mvForm');
+            const mvSel = document.getElementById('mvSel');
+            const mvName = document.getElementById('mvName');
+            const mvClose = document.getElementById('mvClose');
+            let activeXhr = null;
+            let activeMoveFilename = null;
+
+            (function initSideToggle() {
+                const side = document.querySelector('.side');
+                const btn = document.querySelector('.hamb');
+                if (!side || !btn) return;
+
+                const key = 'pd_side_collapsed';
+                const mq = window.matchMedia('(max-width: 640px)');
+
+                function apply(collapsed) {
+                    side.classList.toggle('isCollapsed', collapsed);
+                    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                }
+
+                const saved = localStorage.getItem(key);
+                const initial = saved === null ? mq.matches : saved === '1';
+                apply(initial);
+
+                btn.addEventListener('click', function () {
+                    const next = !side.classList.contains('isCollapsed');
+                    apply(next);
+                    localStorage.setItem(key, next ? '1' : '0');
+                });
+
+                mq.addEventListener('change', function (e) {
+                    if (!e.matches) apply(false);
+                    else {
+                        const s = localStorage.getItem(key);
+                        apply(s === null ? true : s === '1');
+                    }
+                });
+            })();
+
+            function getRows() {
+                return Array.from(document.querySelectorAll('.fileRow'));
+            }
+
+            function applyFilterSort() {
+                const rows = getRows();
+                const query = (q && q.value ? q.value : '').trim().toLowerCase();
+                const suf = (suffix && suffix.value ? suffix.value : '').trim().toLowerCase().replace(/^\./, '');
+                const sortMode = sortSel ? sortSel.value : 'time_desc';
+                const df = dateFrom && dateFrom.value ? new Date(dateFrom.value + 'T00:00:00').getTime() / 1000 : null;
+                const visible = [];
+                rows.forEach(row => {
+                    const name = row.getAttribute('data-name') || '';
+                    const ext = row.getAttribute('data-ext') || '';
+                    const kind = row.getAttribute('data-kind') || 'file';
+                    const size = parseInt(row.getAttribute('data-size') || '0', 10) || 0;
+                    const t = parseInt(row.getAttribute('data-time') || '0', 10) || 0;
+                    const hitName = !query || name.includes(query);
+                    const hitSuf = kind === 'folder' ? !suf : (!suf || (ext || '').toLowerCase() === suf);
+                    const hitDate = !df || t >= df;
+                    const ok = hitName && hitSuf && hitDate;
+                    row.style.display = ok ? '' : 'none';
+                    if (ok) visible.push({ row, name, ext, size, t, kind });
+                });
+
+                function cmp(a, b) {
+                    if (sortMode === 'time_asc') return a.t - b.t;
+                    if (sortMode === 'time_desc') return b.t - a.t;
+                    if (sortMode === 'size_asc') return a.size - b.size;
+                    if (sortMode === 'size_desc') return b.size - a.size;
+                    if (sortMode === 'name_desc') return b.name.localeCompare(a.name, 'zh-Hans-CN');
+                    if (sortMode === 'name_asc') return a.name.localeCompare(b.name, 'zh-Hans-CN');
+                    if (sortMode === 'type_asc') return (a.ext || '').localeCompare((b.ext || ''), 'en');
+                    return 0;
+                }
+
+                const foldersV = visible.filter(v => v.kind === 'folder');
+                const filesV = visible.filter(v => v.kind !== 'folder');
+                foldersV.sort(cmp);
+                filesV.sort(cmp);
+
+                if (table && rowH) {
+                    foldersV.forEach(v => table.appendChild(v.row));
+                    filesV.forEach(v => table.appendChild(v.row));
+                    table.insertBefore(rowH, table.firstChild);
+                }
+            }
+
+            if (q) q.addEventListener('input', applyFilterSort);
+            if (suffix) suffix.addEventListener('input', applyFilterSort);
+            if (sortSel) sortSel.addEventListener('change', applyFilterSort);
+            if (dateFrom) dateFrom.addEventListener('change', applyFilterSort);
+
+            function setUploadUi(on, pct, text) {
+                if (!upBox || !upProg || !upText) return;
+                if (!on) {
+                    upBox.classList.remove('isOn');
+                    upProg.style.width = '0%';
+                    upText.textContent = '';
+                    return;
+                }
+                upBox.classList.add('isOn');
+                upProg.style.width = Math.max(0, Math.min(100, pct || 0)) + '%';
+                upText.textContent = text || '上传中…';
+            }
+
+            function uploadOne(file) {
+                if (!uploadForm) return;
+                if (activeXhr) return;
+                const fd = new FormData();
+                fd.append('file', file);
+                if (folderId && folderId.value) fd.append('folder_id', folderId.value);
+                const xhr = new XMLHttpRequest();
+                activeXhr = xhr;
+                xhr.open('POST', uploadForm.getAttribute('action') || '/upload');
+                xhr.upload.onprogress = function (e) {
+                    if (!e.lengthComputable) return;
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    setUploadUi(true, pct, '上传中… ' + pct + '%');
+                };
+                xhr.onerror = function () {
+                    activeXhr = null;
+                    setUploadUi(false);
+                    location.reload();
+                };
+                xhr.onload = function () {
+                    activeXhr = null;
+                    setUploadUi(false);
+                    location.reload();
+                };
+                setUploadUi(true, 0, '准备上传…');
+                xhr.send(fd);
+            }
+
+            if (uploadBtn && fileInput) {
+                uploadBtn.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', () => {
+                    if (!fileInput.files || fileInput.files.length === 0) return;
+                    uploadOne(fileInput.files[0]);
+                    fileInput.value = '';
+                });
+            }
+
+            if (upCancel) {
+                upCancel.addEventListener('click', () => {
+                    if (activeXhr) {
+                        activeXhr.abort();
+                        activeXhr = null;
+                        setUploadUi(false);
+                    }
+                });
+            }
+
+            function showDrop(on) {
+                if (!drop) return;
+                if (on) drop.classList.add('isOn');
+                else drop.classList.remove('isOn');
+            }
+
+            if (uploadForm) {
+                window.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    showDrop(true);
+                });
+                window.addEventListener('dragleave', (e) => {
+                    if (e.relatedTarget === null) showDrop(false);
+                });
+                window.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    showDrop(false);
+                    const files = e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files : null;
+                    if (!files || files.length === 0) return;
+                    uploadOne(files[0]);
+                });
+            }
+
+            function openMove(fn) {
+                if (!mv || !mvForm || !mvName) return;
+                activeMoveFilename = fn;
+                mvName.textContent = fn;
+                mv.classList.add('isOn');
+                mv.setAttribute('aria-hidden', 'false');
+                mvForm.setAttribute('action', '/move_file/' + encodeURIComponent(fn));
+            }
+            function closeMove() {
+                if (!mv) return;
+                mv.classList.remove('isOn');
+                mv.setAttribute('aria-hidden', 'true');
+                activeMoveFilename = null;
+            }
+            if (mvClose) mvClose.addEventListener('click', closeMove);
+            if (mv) mv.addEventListener('click', (e) => { if (e.target === mv) closeMove(); });
+            Array.from(document.querySelectorAll('.mvBtn')).forEach(btn => {
+                btn.addEventListener('click', () => openMove(btn.getAttribute('data-fn')));
+            });
+
+            const usageBar = document.getElementById('usageBar');
+            if (usageBar) {
+                const raw = usageBar.getAttribute('data-usage');
+                const pct = Math.max(0, Math.min(100, parseInt(raw || '0', 10) || 0));
+                usageBar.style.width = pct + '%';
+            }
+
+            applyFilterSort();
+        })();
+    </script>
+</body>
+</html>
