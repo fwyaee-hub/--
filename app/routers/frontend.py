@@ -106,7 +106,11 @@ def get_flashed_messages_impl(request: Request):
 def render(template_name, request, **kwargs):
     kwargs["get_flashed_messages"] = lambda: get_flashed_messages_impl(request)
     kwargs["current_user"] = request.state.user if hasattr(request.state, "user") else None
-    return templates.TemplateResponse(template_name, {"request": request, **kwargs})
+    context = {"request": request, **kwargs}
+    try:
+        return templates.TemplateResponse(template_name, context)
+    except TypeError:
+        return templates.TemplateResponse(request, template_name, context)
 
 # Middleware to get current user
 async def add_user_to_request(request: Request, db: Session):
